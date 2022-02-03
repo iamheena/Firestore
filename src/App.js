@@ -1,7 +1,7 @@
 import React,{useState,useEffect} from 'react'
 import db from './Firestore'
 import { collection, addDoc,onSnapshot, QuerySnapshot, getDocs, query,doc,setDoc,deleteDoc, orderBy, limit,where, startAt, endAt, Query,startAfter , offset} from "firebase/firestore"; 
-import { async } from '@firebase/util';
+import style from './style.module.css'
 
 function App() {
   const [Username, setUsername] = useState("")
@@ -13,64 +13,71 @@ function App() {
   const [lastvisible,setlastvisible]=useState(null)  
   const [page,setPage]=useState(1)
   const[totalval,setTotal]=useState(0)
+  const[pageno,setpageNo]=useState([])
 
-  const collectionque= collection(db,"User") 
-  
+  const collectionque= collection(db,"User")   
+
   useEffect(async()=> {  
     handlePageChange(page)
-    gettotalval()
+   gettotal()
+   
   },[])
-    console.log("outer page", page);
+  // console.log("outer page", page);
   const handlePageChange=async (pageNo)=>{
+    // console.log("pagenooooooooo",pageNo);
 
     let skip = (pageNo-1)*dataLimit
     console.log("page", pageNo, skip);
       
       let startAfter1 = lastvisible
+      console.log("lastVisible........",lastvisible);
       if(pageNo==1){
         startAfter1=null;
       }
 
     const q = query(collectionque,
-      orderBy("Username"),
+      orderBy("Username","asc"),
       startAfter(startAfter1),
       limit(dataLimit)
-    );
+    );    
     
-    const documentsnap=await getDocs(q)
+    const documentsnap=await getDocs(q)   
     const lastvisible2=documentsnap.docs[documentsnap.docs.length-1]
+    // setTotal(documentsnap)
+    
 
     setlastvisible(lastvisible2)
-    console.log("documentsnap", documentsnap);
+    // console.log("length.....",lastvisible);
+    // console.log("documentsnap", documentsnap);
 
-    onSnapshot(q,(snapshot) =>{        
+    onSnapshot(q,(snapshot) =>{      
       let docData=[]
-      console.log("snapshot", snapshot.docs );
+      // console.log("snapshot", snapshot.docs );
         snapshot.docs.map((doc) =>{
+          // console.log("doccccccccccccccccc",doc);
           let info1=doc.data()
           info1.id=doc.id  
-          docData.push(info1)         
+          docData.push(info1)  
+          // console.log("info11111",info1);       
         })        
         setInfo (docData)
         setTotal(docData)
+       
+        // console.log("sdsdsdsdds",totalval);
       
-      }) 
-
-
-
+      })
   }
-  const gettotalval=()=>{
-  console.log("total value is",totalval);
+  const gettotal= async()=>{
+    const q = query(collectionque);    
+    
+    const totallength=  await getDocs(q) 
+    console.log("totalitemmmmm",totallength.docs);
+
+    const totalpage=Math.ceil(totallength.docs.length/dataLimit)
+    console.log("totalpages",totalpage);
+    setpageNo (totalpage)
   }
-
-  // const getQuery=(page)=>{
-  //   const q;
-  //   if(page>1){
-      
-  //   }
-  // }
-
-
+  
   const resetState=()=>{
     setUsername("")
     setPassword("")
@@ -84,9 +91,9 @@ function App() {
       Passsword :Passsword,
       Email: Email
     });
+    console.log("add data",docRef);
     resetState()
   }
-
   function editdata(id){
        info.find((d,key)=>{  
          if(d.id===id){
@@ -97,8 +104,7 @@ function App() {
            setkey(id)
         }  
     })  
-  }
-  
+  }  
   function updatedata(){
     const Username=document.querySelector("#uname").value
     const Passsword=document.querySelector("#pass").value
@@ -121,9 +127,21 @@ function App() {
   async function deletedata(id){    
     let request= await deleteDoc(doc(db,"User",id))
     console.log(request);
-  }
+  }    
 
-    
+  const createPAgination =()=>{ 
+
+    const ele=[]
+    // console.log("sdshjdsdsdsddsds",pageno);
+
+    for (let index = 1; index <= pageno; index++) {
+
+        let pageUi= <button key={index} onClick={()=>{setPage(index);handlePageChange(index)}}>{index}</button>
+
+      ele.push ( pageUi)      
+    }
+    return ele;
+  }
   return (
     <div>
       <table>
@@ -142,16 +160,22 @@ function App() {
               <td>{d.Email}</td>
               <td style={{width:"auto"}} onClick={()=>editdata(d.id)}><button>Edit</button></td>
               <td style={{width:"auto"}}><button onClick={()=>deletedata(d.id)}>Delete</button></td>
-            </tr>
-          ))}
+              
+            </tr>            
+          ))}         
         </tbody>
       </table>
-   
-      <button onClick={()=>{ setPage(1); setlastvisible(null) ; handlePageChange(1)}}>1</button>
+    
+
+{
+  createPAgination()
+}
+
+      {/* <button onClick={()=>{ setPage(1); setlastvisible(null) ; handlePageChange(1)}}>1</button>
       <button onClick={()=>{ setPage(2); handlePageChange(2)}}>2</button>
-      <button onClick={()=>{ setPage(3); handlePageChange(3)}}>3</button>
+      <button onClick={()=>{ setPage(3); handlePageChange(3)}}>3</button> */}
       
-      <div className="content">
+      <div className={style.content}>
         <label htmlFor="">Username</label>
               <input type="text" id="uname" value={Username} onChange={(e)=>setUsername(e.target.value)}/>
         <label htmlFor="">Password</label>
