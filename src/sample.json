@@ -1,0 +1,24 @@
+{
+  "users": {
+    "-L6sDfnljY_Kd2IOvWu9": {
+      "age": "24",
+      "email": "ameraz@email.com",
+      "name": "Alex Meraz1"
+    },
+    "-L6sDmT0yPtPFIMOj40s": {
+      "age": "22",
+      "email": "mrafi@email.com",
+      "name": "Mohammand Rafi"
+    },
+    "-L7q-Sg_SCvs7QOlb7Kh": {
+      "age": "31",
+      "email": "rtamil@email.com",
+      "name": "Raja Tamil"
+    },
+    "-L7qUZl_fpcmYzJMZK-V": {
+      "age": "21",
+      "email": "spichai@email.com",
+      "name": "Sundar Pichai"
+    }
+  }
+}
