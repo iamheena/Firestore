@@ -38,180 +38,99 @@ function App() {
   const [Key, setkey] = useState(0);
   const [dataLimit, setdataLimit] = useState(5);
   const [lastvisible, setlastvisible] = useState(null);
+  const[filterItemData,setFilterItemData]=useState([]);
 
   const [page, setPage] = useState(1);
   const [totalval, setTotal] = useState(0);
   const [pageno, setpageNo] = useState([]);
   const [progress, setProgress] = useState(0);
   const [url, setUrl] = useState([]);
+  
 
   const collectionque = collection(db, "Users");
 
   const storage = getStorage();
   useEffect(
-    async () => {
+     () => {
       handlePageChange(page);
-      gettotal();
-      console.log("Image", Image);
-      console.log("urls", url);
-    },
-    [Image],
-    [url]
+      gettotal();    
+      
+    },   
+    [Image,url]
   );
-
+ 
   const handlePageChange = async (pageNo) => {
+    console.log("pagenooooo",pageNo);
     let skip = (pageNo - 1) * dataLimit;
+    console.log("page skip",pageNo,skip);
 
-    if (pageNo === 1) {
-      const first = query(
+    let startafter1=lastvisible  
+    if(pageNo===1){
+       startafter1=null
+       const first = query(
         collectionque,
         orderBy("Username", "asc"),
-        startAfter(lastvisible),
+        startAfter(startafter1),
         limit(dataLimit)
       );
       const documentSnapshots = await getDocs(first);
-      // console.log("pageno 1",documentSnapshots.docs);
+      console.log("pageno 1",documentSnapshots.docs);
 
-      // const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length-1];
-      // console.log("last", lastVisible);
-      setlastvisible(dataLimit);
+      const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length-1];
+      console.log("last", lastVisible);
+      setlastvisible(lastVisible);
       onSnapshot(first, (snapshot) => {
         let docData = [];
         snapshot.docs.map((doc) => {
           let info1 = doc.data();
           info1.id = doc.id;
           docData.push(info1);
+          return info1;
         });
         setInfo(docData);
-      });
-    } else if (pageNo === 2) {
-      console.log("lasttttt", lastvisible);
-      const first = query(
-        collectionque,
-        orderBy("Username", "asc"),
-        startAfter(lastvisible),
-        limit(dataLimit)
-      );
-      const documentSnapshots = await getDocs(first);
-      console.log("pageno 2", documentSnapshots.docs);
-
-      // const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length-1];
-      // console.log("last", lastVisible);
-      // setlastvisible(dataLimit)
-
-      onSnapshot(first, (snapshot) => {
-        let docData = [];
-        snapshot.docs.map((doc) => {
-          let info1 = doc.data();
-          info1.id = doc.id;
-          docData.push(info1);
-        });
-        setInfo(docData);
+        setFilterItemData(docData);
       });
     }
+    else if(pageno ===2){
+      const collectionque = collection(db, "Users");
+      // console.log("collection",collectionque);
 
-    // let skip = (pageNo-1)*dataLimit
-    // console.log("page", pageNo, skip);
-    //  let startafter1=lastvisible
-    // if(pageNo===1){
-    //    startafter1=lastvisible
-    // }
+      const documentSnapshots = await getDocs(collectionque);   
+      
+      console.log("lastvisible",lastvisible);
+      const first = query(
+        collectionque,
+        orderBy("Username", "asc"),
+        startAfter(lastvisible),
+        limit(dataLimit)
+      );
+        const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length-1];
+      // console.log("last", lastVisible);
+      setlastvisible(lastVisible);
+      onSnapshot(first, (snapshot) => {
+        let docData = [];
+        snapshot.docs.map((doc) => {
+          let info1 = doc.data();
+          info1.id = doc.id;
+          docData.push(info1);
+          return info1;
+        });
+        setInfo(docData);
+        setFilterItemData(docData);
+      });
+    }    
+    if(pageNo===3){
 
-    //   const first = query(collectionque, orderBy("Username","asc"),startAfter(lastvisible), limit(dataLimit));
-    //   const documentSnapshots = await getDocs(first);
-
-    //   const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length-1];
-    //   console.log("last", lastVisible);
-    //   setlastvisible(lastVisible)
-
-    //     onSnapshot(first,(snapshot) =>{
-    //       let docData=[]
-
-    //         snapshot.docs.map((doc) =>{
-    //           // console.log("doccccccccccccccccc",doc);
-    //           let info1=doc.data()
-    //           info1.id=doc.id
-    //           docData.push(info1)
-    //           // console.log("info11111",info1);
-    //         })
-    //         setInfo (docData)
-    //         // setTotal(docData)
-
-    //       })
-
-    // else if(pageNo===2){
-    //   // let skip = (pageNo-1)*dataLimit
-    //   const first = query(collectionque, orderBy("Username","asc"),startAfter(skip), limit(dataLimit));
-    //   const documentSnapshots = await getDocs(first);
-    //   console.log("first",documentSnapshots.docs);
-
-    //   const lastVisible1 = documentSnapshots.docs[documentSnapshots.docs.length-1];
-    //   console.log("last", lastVisible1);
-    //   setlastvisible1(lastVisible1);
-
-    //     onSnapshot(first,(snapshot) =>{
-    //       let docData=[]
-    //       // console.log("snapshot", snapshot.docs );
-    //         snapshot.docs.map((doc) =>{
-    //           // console.log("doccccccccccccccccc",doc);
-    //           let info1=doc.data()
-    //           info1.id=doc.id
-    //           docData.push(info1)
-    //           // console.log("info11111",info1);
-    //         })
-    //         setInfo (docData)
-    //         // setTotal(docData)
-
-    //       })
-
-    // }
-
-    // setTotal(documentsnap)
-
-    //   let startAfter1 = lastvisible
-    //   console.log("lastVisible........",lastvisible);
-    //   if(pageNo==1){
-    //     startAfter1=null;
-    //   }
-    //     const q = query(collectionque,
-    //     orderBy("Username","asc"),
-    //     startAfter(startAfter1),
-    //     limit(dataLimit)
-    //   );
-
-    // const documentsnap=await getDocs(q)
-    // const lastvisible2=documentsnap.docs[documentsnap.docs.length-1]
-    // // setTotal(documentsnap)
-
-    // setlastvisible(lastvisible2)
-    // // console.log("length.....",lastvisible);
-    // // console.log("documentsnap", documentsnap);
-
-    // onSnapshot(q,(snapshot) =>{
-    //   let docData=[]
-    //   // console.log("snapshot", snapshot.docs );
-    //     snapshot.docs.map((doc) =>{
-    //       console.log("doccccccccccccccccc",doc);
-    //       let info1=doc.data()
-    //       info1.id=doc.id
-    //       docData.push(info1)
-    //       // console.log("info11111",info1);
-    //     })
-    //     setInfo (docData)
-    //     setTotal(docData)
-
-    //     // console.log("sdsdsdsdds",totalval);
-
-    //   })
+    } 
   };
   const gettotal = async () => {
     const q = query(collectionque);
 
     const totallength = await getDocs(q);
-    console.log("totalitemmmmm", totallength.docs);
+    // console.log("totalitemmmmm", totallength.docs);
 
     const totalpage = Math.ceil(totallength.docs.length / dataLimit);
-    console.log("totalpages", totalpage);
+    // console.log("totalpages", totalpage);
     setpageNo(totalpage);
   };
 
@@ -235,7 +154,7 @@ function App() {
   };
 
   function editdata(id) {
-    info.find((d, key) => {
+   info.find((d, key) => {
       if (d.id === id) {
         console.log(key);
         setUsername(d.Username);
@@ -243,7 +162,9 @@ function App() {
         setEmail(d.Email);
         setImage(d.Image);
         setkey(id);
+       
       }
+      return d
     });
   }
   function updatedata() {
@@ -259,7 +180,7 @@ function App() {
           Passsword: Passsword,
           Email: Email,
           Image: Image,
-        });
+        });       
 
         resetState();
         setkey(null);
@@ -274,8 +195,6 @@ function App() {
 
   const createPAgination = () => {
     const ele = [];
-    // console.log("sdshjdsdsdsddsds",pageno);
-
     for (let index = 1; index <= pageno; index++) {
       let pageUi = (
         <button
@@ -286,6 +205,7 @@ function App() {
           }}
         >
           {index}
+         
         </button>
       );
 
@@ -330,9 +250,32 @@ function App() {
     // .then(()=>console.log("all image upload"))
     // .catch((err)=>console.log(err))
   };
+  const handlesearch= (e)=>{
+     const searchdata=e.target.value
 
+  //  setFilter(searchdata)
+  const data= info.filter((item)=>{   
+    
+       if(searchdata=="" ){      
+         return item
+       } 
+       else if(item.Username && item.Username.toLowerCase().includes(searchdata)){
+        return item
+      }      
+     
+   }) 
+  //  console.log("dataaattaaa",data);
+  //  console.log("info",info);
+   setFilterItemData(data)
+   
+  } 
   return (
     <div>
+        <div className="search" >
+              <input type="text" onChange={handlesearch} placeholder="Search...."  />
+              <button >Search</button>
+              
+      </div>
       <table>
         <tbody>
           <tr>
@@ -341,7 +284,7 @@ function App() {
             <th>Email</th>
             <th>Image</th>
           </tr>
-          {info.map((d, i) => (
+         {filterItemData.map((d, i) => (
             <tr key={d.id}>
               <td>{d.Username}</td>
               <td>{d.Passsword}</td>
@@ -354,7 +297,10 @@ function App() {
                 <button onClick={() => deletedata(d.id)}>Delete</button>
               </td>
             </tr>
-          ))}
+          ))
+            }
+            
+            
         </tbody>
       </table>
 
